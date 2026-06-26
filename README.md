@@ -1,89 +1,105 @@
-# TiZero 随机电影抽取
+# Film Dice 🎬🎲
 
-从高分片库中随机抽卡，发现你没看过的好电影。
+随机选片器 — 从高分片库中抽卡，发现你没看过的好电影。
 
-## 启动项目
+## 功能
 
-### 第一步：打开终端
+- 🎲 随机抽卡（5 张卡牌翻牌动画）
+- 🔍 多维筛选（类型/年代/评分/语言/片长）
+- 📋 想看/已看列表
+- 📜 抽取历史
+- 🌙 明暗主题切换
 
-Mac 用户打开 **终端**（Terminal），可以在启动台搜索"终端"。
+## 在线体验
 
-### 第二步：进入项目目录
+👉 https://tizero77.github.io/film-dice/
 
-复制粘贴以下命令，按回车：
+## 本地开发
+
+### 1. 克隆项目
 
 ```bash
-cd /Users/neo/Documents/随机电影清单推荐-抽取/tizero
+git clone https://github.com/TiZero77/film-dice.git
+cd film-dice
 ```
 
-### 第三步：启动开发服务器
+### 2. 安装依赖
+
+```bash
+npm install
+```
+
+### 3. 配置环境变量
+
+复制 `.env.example` 为 `.env`，填入你的 API Key：
+
+```bash
+cp .env.example .env
+```
+
+需要两个 Key：
+
+- **TMDB API Key** — 免费注册：https://www.themoviedb.org/settings/api
+- **Supabase** — 免费注册：https://supabase.com ，创建项目后在 Settings → API 获取
+
+### 4. 创建数据库表
+
+在 Supabase Dashboard → SQL Editor 执行：
+
+```sql
+CREATE TABLE watchlist (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  movie_id INTEGER NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE watched (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  movie_id INTEGER NOT NULL,
+  rating INTEGER CHECK (rating >= 1 AND rating <= 10),
+  comment TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE draw_history (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  movie_id INTEGER NOT NULL,
+  drawn_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_watchlist_user ON watchlist(user_id);
+CREATE INDEX idx_watched_user ON watched(user_id);
+CREATE INDEX idx_draw_history_user ON draw_history(user_id);
+
+ALTER TABLE watchlist ENABLE ROW LEVEL SECURITY;
+ALTER TABLE watched ENABLE ROW LEVEL SECURITY;
+ALTER TABLE draw_history ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all for watchlist" ON watchlist FOR ALL USING (true);
+CREATE POLICY "Allow all for watched" ON watched FOR ALL USING (true);
+CREATE POLICY "Allow all for draw_history" ON draw_history FOR ALL USING (true);
+```
+
+### 5. 启动开发服务器
 
 ```bash
 npm run dev
 ```
 
-看到类似这样的输出就说明启动成功了：
-
-```
-VITE v8.x.x  ready in xxx ms
-
-➜  Local:   http://localhost:5173/
-```
-
-### 第四步：打开浏览器
-
-在浏览器地址栏输入：
-
-```
-http://localhost:5173
-```
-
-即可看到项目页面。
-
-### 关闭项目
-
-在终端按 `Ctrl + C` 可以停止服务器。
-
----
-
-## 常见问题
-
-### 页面打不开？
-
-检查终端有没有报错。如果端口被占用，可以换个端口启动：
-
-```bash
-npm run dev -- --port 3000
-```
-
-然后访问 `http://localhost:3000`
-
-### npm 命令提示找不到？
-
-确保你在 `tizero` 目录下（终端路径末尾应该是 `tizero`）。
-
-### 抽取电影没反应？
-
-检查 `.env` 文件里的 API Key 是否正确。文件位置：`tizero/.env`
-
----
-
-## 项目结构（简单了解）
-
-```
-tizero/
-├── src/              ← 源代码
-│   ├── components/   ← 页面组件
-│   ├── api/          ← API 请求
-│   ├── hooks/        ← 数据钩子
-│   ├── stores/       ← 状态管理
-│   └── types/        ← 类型定义
-├── .env              ← API 密钥（不要泄露）
-└── package.json      ← 项目配置
-```
+打开 http://localhost:5173
 
 ## 技术栈
 
-- React + Vite + TailwindCSS
+- React 18 + Vite
+- Zustand（状态管理）
+- TanStack Query（数据请求）
+- Framer Motion（动画）
 - TMDB API（电影数据）
 - Supabase（用户数据存储）
+
+## 开源协议
+
+MIT
