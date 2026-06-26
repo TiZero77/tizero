@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useMovieStore } from './stores/useMovieStore'
 import { Header } from './components/Layout/Header'
 import { Sidebar } from './components/Layout/Sidebar'
+import { FilterBar } from './components/FilterBar/FilterBar'
 
 const queryClient = new QueryClient()
 
@@ -15,7 +16,7 @@ function AppContent() {
         <Header />
         <div className="flex h-[calc(100vh-65px)]">
           <Sidebar>
-            <p className="text-muted text-sm">筛选栏开发中...</p>
+            <FilterBar />
           </Sidebar>
           <main className="flex-1 flex items-center justify-center">
             <p className="text-muted">主内容区开发中...</p>
